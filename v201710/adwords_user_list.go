@@ -84,7 +84,7 @@ type UserList struct {
 	SizeRange             *string `xml:"sizeRange,omitempty"`          // size range "LESS_THEN_FIVE_HUNDRED","LESS_THAN_ONE_THOUSAND", "ONE_THOUSAND_TO_TEN_THOUSAND","TEN_THOUSAND_TO_FIFTY_THOUSAND","FIFTY_THOUSAND_TO_ONE_HUNDRED_THOUSAND","ONE_HUNDRED_THOUSAND_TO_THREE_HUNDRED_THOUSAND","THREE_HUNDRED_THOUSAND_TO_FIVE_HUNDRED_THOUSAND","FIVE_HUNDRED_THOUSAND_TO_ONE_MILLION","ONE_MILLION_TO_TWO_MILLION","TWO_MILLION_TO_THREE_MILLION","THREE_MILLION_TO_FIVE_MILLION","FIVE_MILLION_TO_TEN_MILLION","TEN_MILLION_TO_TWENTY_MILLION","TWENTY_MILLION_TO_THIRTY_MILLION","THIRTY_MILLION_TO_FIFTY_MILLION","OVER_FIFTY_MILLION"
 	SizeForSearch         *int64  `xml:"sizeForSearch,omitempty"`      // estimated number of google.com users in this group
 	SizeRangeForSearch    *string `xml:"sizeRangeForSearch,omitempty"` // same values as size range but for search
-	ListType              *string `xml:"sizeType,omitempty"`           // one of "UNKNOWN", "REMARKETING", "LOGICAL", "EXTERNAL_REMARKETING", "RULE_BASED", "SIMILAR"
+	ListType              *string `xml:"listType,omitempty"`           // one of "UNKNOWN", "REMARKETING", "LOGICAL", "EXTERNAL_REMARKETING", "RULE_BASED", "SIMILAR"
 
 	// LogicalUserList
 	LogicalRules *[]UserListLogicalRule `xml:"rules,omitempty"`
@@ -237,7 +237,7 @@ func NewMutateMembersOperand() *MutateMembersOperand {
 //     https://developers.google.com/adwords/api/docs/reference/v201710/AdwordsUserListService#get
 //
 func (s AdwordsUserListService) Get(selector Selector) (userLists []UserList, err error) {
-	selector.XMLName = xml.Name{baseUrl, "serviceSelector"}
+	selector.XMLName = xml.Name{Space: baseRemarketingUrl, Local: "serviceSelector"}
 	respBody, err := s.Auth.request(
 		adwordsUserListServiceUrl,
 		"get",
@@ -246,7 +246,7 @@ func (s AdwordsUserListService) Get(selector Selector) (userLists []UserList, er
 			Sel     Selector
 		}{
 			XMLName: xml.Name{
-				Space: baseUrl,
+				Space: baseRemarketingUrl,
 				Local: "get",
 			},
 			Sel: selector,
@@ -259,7 +259,7 @@ func (s AdwordsUserListService) Get(selector Selector) (userLists []UserList, er
 		Size      int64      `xml:"rval>totalNumEntries"`
 		UserLists []UserList `xml:"rval>entries"`
 	}{}
-	fmt.Printf("%s\n", respBody)
+
 	err = xml.Unmarshal([]byte(respBody), &getResp)
 	if err != nil {
 		return userLists, err
