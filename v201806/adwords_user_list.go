@@ -64,9 +64,14 @@ type MutateMembersOperations struct {
 }
 
 type MutateMembersOperand struct {
-	UserListId int64    `xml:"userListId"`
-	RemoveAll  *bool    `xml:"removeAll"`
-	Members    []string `xml:"members"`
+	UserListId    int64 `xml:"userListId"`
+	RemoveAll     *bool `xml:"removeAll"`
+	Members       []string
+	HashedMembers []MutateMemberListItem `xml:"membersList"`
+}
+
+type MutateMemberListItem struct {
+	HashedEmail string `xml:"hashedEmail"`
 }
 
 type UserList struct {
@@ -188,6 +193,10 @@ func NewCrmBasedUserList(name, description string, membershipLifeSpan int64, opt
 
 func NewMutateMembersOperand() *MutateMembersOperand {
 	return &MutateMembersOperand{}
+}
+
+func NewMembersListItem(hashedEmail string) MutateMemberListItem {
+	return MutateMemberListItem{HashedEmail: hashedEmail}
 }
 
 // Get returns an array of adwords user lists and the total number of adwords user lists matching
@@ -360,21 +369,25 @@ func (s *AdwordsUserListService) MutateMembers(mutateMembersOperations MutateMem
 }
 
 func (mmo MutateMembersOperand) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-
-	mmo.encodeEmails()
+	if len(mmo.Members) > 0 {
+		// This function, for fallback purposes, will only accept plain-text emails as Members[]
+		// Or already hashed emails in HashedMembers. Not both!
+		mmo.encodeEmails()
+	}
 
 	e.EncodeToken(start)
 	e.EncodeElement(&mmo.UserListId, xml.StartElement{Name: xml.Name{baseRemarketingUrl, "userListId"}})
-	e.EncodeElement(&mmo.Members, xml.StartElement{Name: xml.Name{baseRemarketingUrl, "members"}})
+	e.EncodeElement(&mmo.HashedMembers, xml.StartElement{Name: xml.Name{baseRemarketingUrl, "membersList"}})
 	e.EncodeToken(start.End())
 	return nil
 }
 
 func (mmo *MutateMembersOperand) encodeEmails() {
+	mmo.HashedMembers = make([]MutateMemberListItem, len(mmo.Members))
 
 	for key, value := range mmo.Members {
 		h256 := sha256.New()
 		io.WriteString(h256, value)
-		mmo.Members[key] = fmt.Sprintf("%x", h256.Sum(nil))
+		mmo.HashedMembers[key] = NewMembersListItem(fmt.Sprintf("%x", h256.Sum(nil)))
 	}
 }
