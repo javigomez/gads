@@ -65,7 +65,6 @@ type MutateMembersOperations struct {
 
 type MutateMembersOperand struct {
 	UserListId int64    `xml:"userListId"`
-	DataType   string   `xml:"dataType"`
 	RemoveAll  *bool    `xml:"removeAll"`
 	Members    []string `xml:"members"`
 }
@@ -188,7 +187,7 @@ func NewCrmBasedUserList(name, description string, membershipLifeSpan int64, opt
 }
 
 func NewMutateMembersOperand() *MutateMembersOperand {
-	return &MutateMembersOperand{DataType: "EMAIL_SHA256"}
+	return &MutateMembersOperand{}
 }
 
 // Get returns an array of adwords user lists and the total number of adwords user lists matching
@@ -366,7 +365,6 @@ func (mmo MutateMembersOperand) MarshalXML(e *xml.Encoder, start xml.StartElemen
 
 	e.EncodeToken(start)
 	e.EncodeElement(&mmo.UserListId, xml.StartElement{Name: xml.Name{baseRemarketingUrl, "userListId"}})
-	e.EncodeElement(&mmo.DataType, xml.StartElement{Name: xml.Name{baseRemarketingUrl, "dataType"}})
 	e.EncodeElement(&mmo.Members, xml.StartElement{Name: xml.Name{baseRemarketingUrl, "members"}})
 	e.EncodeToken(start.End())
 	return nil
