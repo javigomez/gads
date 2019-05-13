@@ -237,7 +237,7 @@ func NewMutateMembersOperand() *MutateMembersOperand {
 //     https://developers.google.com/adwords/api/docs/reference/v201809/AdwordsUserListService#get
 //
 func (s AdwordsUserListService) Get(selector Selector) (userLists []UserList, err error) {
-	selector.XMLName = xml.Name{baseUrl, "serviceSelector"}
+	selector.XMLName = xml.Name{baseRemarketingUrl, "serviceSelector"}
 	respBody, err := s.Auth.request(
 		adwordsUserListServiceUrl,
 		"get",
@@ -246,7 +246,7 @@ func (s AdwordsUserListService) Get(selector Selector) (userLists []UserList, er
 			Sel     Selector
 		}{
 			XMLName: xml.Name{
-				Space: baseUrl,
+				Space: baseRemarketingUrl,
 				Local: "get",
 			},
 			Sel: selector,
